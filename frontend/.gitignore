@@ -22,6 +22,8 @@ build
 .env.development
 .env.test
 .env.production
+**/.env
+backend/.env
 
 # Editor / IDE files
 .vscode/*
