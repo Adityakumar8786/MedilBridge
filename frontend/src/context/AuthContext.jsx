@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setUser(null);
     }
-    setLoading(false);
+  setLoading(false);
   };
   const login = async (email, password) => {
     try {
