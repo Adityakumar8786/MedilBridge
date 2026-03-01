@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
+import axios from 'axios' ;
 
 const UserDashboard = () => {
   const [history, setHistory] = useState([]);
@@ -9,7 +9,7 @@ const UserDashboard = () => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData  = async () => {
     try {
       const resHistory = await axios.get('/api/user/history', { withCredentials: true });
       setHistory(resHistory.data);
@@ -51,4 +51,4 @@ const UserDashboard = () => {
   );
 };
 
-export default UserDashboard;
+export default  UserDashboard;
