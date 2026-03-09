@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import axios from 'axios' ;
 
@@ -11,7 +12,7 @@ const UserDashboard = () => {
 
   const fetchData  = async () => {
     try {
-      const resHistory = await axios.get('/api/user/history', { withCredentials: true });
+      const resHistory = await axios.get('/api/user/history' , { withCredentials: true });
       setHistory(resHistory.data);
       const resInfo = await axios.get('/api/user/patient-info', { withCredentials: true });
       setPatientInfo(resInfo.data);
