@@ -1,0 +1,15 @@
+export default {
+  login: "लॉगिन",
+  logout: "लॉगआउट",
+  register: "पंजीकरण",
+  dashboard: "डैशबोर्ड",
+  labReport: "लैब रिपोर्ट",
+  diagnosis: "निदान",
+  timeline: "मेरी स्वास्थ्य समयरेखा",
+  factLabel: "🔬 कच्चा डेटा (लैब तथ्य)",
+  opinionLabel: "🩺 डॉक्टर निदान (राय)",
+  submitReport: "लैब रिपोर्ट जमा करें",
+  addDiagnosis: "निदान जोड़ें",
+  locked: "🔒 लॉक्ड",
+  noData: "कोई डेटा उपलब्ध नहीं",
+};

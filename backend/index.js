@@ -1,28 +1,24 @@
-require('dotenv').config({ override: true });
-const express = require('express');
-const connectDB = require('./config/db');
-const passport = require('passport');
-const session = require('express-session');
-const cors = require('cors');
-require('./config/passport')(passport);
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const connectDB = require("./config/db");
 
 const app = express();
 connectDB();
 
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors());
 app.use(express.json());
-app.use(session({
-  secret: process.env.SESSION_SECRET,  // ✅ will now be defined
-  resave: false,
-  saveUninitialized: false
-}));
-app.use(passport.initialize());
-app.use(passport.session());
 
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/register', require('./routes/registerRoutes'));
-app.use('/api/user', require('./routes/userRoutes'));
-app.use('/api/stats', require('./routes/statsRoutes'));
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/lab", require("./routes/labRoutes"));
+app.use("/api/doctor", require("./routes/doctorRoutes"));
+app.use("/api/patient", require("./routes/patientRoutes"));
+app.use("/api/gov", require("./routes/govRoutes"));
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({ message: err.message || "Server Error" });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

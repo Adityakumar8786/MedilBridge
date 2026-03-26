@@ -1,0 +1,15 @@
+export default {
+  login: "Login",
+  logout: "Logout",
+  register: "Register",
+  dashboard: "Dashboard",
+  labReport: "Lab Report",
+  diagnosis: "Diagnosis",
+  timeline: "My Health Timeline",
+  factLabel: "🔬 RAW DATA (Lab Fact)",
+  opinionLabel: "🩺 DOCTOR DIAGNOSIS (Opinion)",
+  submitReport: "Submit Lab Report",
+  addDiagnosis: "Add Diagnosis",
+  locked: "🔒 Locked",
+  noData: "No data available",
+};

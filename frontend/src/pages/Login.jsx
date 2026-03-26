@@ -1,61 +1,62 @@
-import React, { useState } from 'react';
-import { useNavigate, Navigate,Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import axios from "../api/axios";
 
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { user, loading, login } = useAuth();
+export default function Login({ lang }) {
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
-
-  if (loading) return <div className="text-center py-20">Loading...</div>;
-  if (user) return <Navigate to={user.role === 'patient' ? '/dashboard' : user.role === 'doctor' ? '/doctor-dashboard' : '/govt-dashboard'} />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      // navigate handled in AuthContext
+      const { data } = await axios.post("/auth/login", form);
+      login(data.token, data.user);
+      const roleRoutes = {
+        patient: "/patient",
+        doctor: "/doctor",
+        lab: "/lab",
+        government: "/government",
+      };
+      navigate(roleRoutes[data.user.role] || "/");
     } catch (err) {
-      alert('Login failed – check credentials');
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="card max-w-md w-full">
-        <h2 className="page-title">Login to MediBridge</h2>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>🏥 MedilBridge Login</h2>
+        {error && <div style={styles.error}>{error}</div>}
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="form-input"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="form-input"
-              required
-            />
-          </div>
-          <button type="submit" className="btn btn-solid w-full mt-4">
-            Sign In
-          </button>
+          <input style={styles.input} placeholder="Email" type="email"
+            value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+          <input style={styles.input} placeholder="Password" type="password"
+            value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
+          <button style={styles.btn} type="submit">Login</button>
         </form>
-        <p className="text-center mt-6 text-gray-600">
-          Don't have an account? <Link to="/register" className="text-blue-600 font-medium">Register</Link>
+        <p style={{ textAlign: "center", marginTop: 16, color: "#888" }}>
+          Don't have an account? <Link to="/register">Register</Link>
         </p>
       </div>
     </div>
   );
-};
+}
 
-export default Login;
+const styles = {
+  container: { minHeight: "100vh", display: "flex", alignItems: "center",
+    justifyContent: "center", background: "#0f0f1a" },
+  card: { background: "#1a1a2e", padding: 40, borderRadius: 12, width: 380,
+    boxShadow: "0 8px 32px rgba(0,212,255,0.1)" },
+  title: { color: "#00d4ff", textAlign: "center", marginBottom: 24 },
+  input: { width: "100%", padding: "10px 14px", marginBottom: 14, borderRadius: 8,
+    border: "1px solid #333", background: "#0f0f1a", color: "#fff",
+    fontSize: 14, boxSizing: "border-box" },
+  btn: { width: "100%", padding: 12, background: "#00d4ff", color: "#000",
+    border: "none", borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: "pointer" },
+  error: { background: "#ff444422", color: "#ff4444", padding: 10,
+    borderRadius: 8, marginBottom: 16, textAlign: "center" },
+};
