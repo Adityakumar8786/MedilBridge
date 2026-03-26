@@ -1,21 +1,93 @@
-const passport = require('passport');
-exports.login = passport.authenticate('local', { failureRedirect: '/api/auth/fail' });
-exports.loginSuccess = (req, res) => {
-  res.json({ user: req.user });
-};
-exports.loginFail = (req, res) => {
-  res.status(401).json({ msg: 'Invalid credentials' });
-};
-exports.logout = (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.json({ msg: 'Logged out' });
-  });
-};
-exports.getCurrentUser = (req, res) => {
-  if (req.user) {
-    res.json(req.user);
-  } else {
-    res.status(401).json({ msg: 'No user' });
+const User = require("../models/User");
+const PatientProfile = require("../models/PatientProfile");
+const LabEntity = require("../models/LabEntity");
+const jwt = require("jsonwebtoken");
+const auditLog = require("../utils/auditLogger");
+
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+
+// POST /api/auth/register
+const register = async (req, res) => {
+  try {
+    const { name, email, password, role, ...extra } = req.body;
+
+    const validRoles = ["patient", "doctor", "lab", "government"];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(400).json({ message: "Email already registered" });
+
+    const user = await User.create({ name, email, password, role });
+
+    // Create extended profile based on role
+    if (role === "patient") {
+      await PatientProfile.create({ userId: user._id, ...extra });
+    }
+    if (role === "lab") {
+      await LabEntity.create({
+        userId: user._id,
+        labName: extra.labName || name,
+        registrationNumber: extra.registrationNumber || `LAB-${Date.now()}`,
+        city: extra.city,
+        state: extra.state,
+      });
+    }
+
+    await auditLog({
+      userId: user._id,
+      role,
+      action: "USER_REGISTERED",
+      targetModel: "User",
+      targetId: user._id,
+      newValue: { name, email, role },
+      ipAddress: req.ip,
+    });
+
+    res.status(201).json({
+      token: generateToken(user._id),
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
+
+// POST /api/auth/login
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (!user.isActive) return res.status(403).json({ message: "Account deactivated" });
+
+    await auditLog({
+      userId: user._id,
+      role: user.role,
+      action: "USER_LOGIN",
+      targetModel: "User",
+      targetId: user._id,
+      ipAddress: req.ip,
+    });
+
+    res.json({
+      token: generateToken(user._id),
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// GET /api/auth/me
+const getMe = async (req, res) => {
+  res.json({ user: req.user });
+};
+
+module.exports = { register, login, getMe };

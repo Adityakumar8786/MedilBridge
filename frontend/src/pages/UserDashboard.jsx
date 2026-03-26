@@ -10,7 +10,7 @@ const UserDashboard = () => {
     fetchData();
   }, []);
 
-  const fetchData  = async () => {
+   const fetchData  = async () => {
     try {
       const resHistory = await axios.get('/api/user/history' , { withCredentials: true });
       setHistory(resHistory.data);
