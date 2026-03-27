@@ -7,19 +7,35 @@ const connectDB = require("./config/db");
 
 const app = express();
 
-// Connect to Database
-connectDB();
-
-// Middleware
+// =============== CORS CONFIGURATION ===============
 app.use(cors({
-  origin: "https://medilbridge-1.onrender.com",   // Change this if your Render URL changes
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (Postman, mobile apps, etc.)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      "https://medilbridge-1.onrender.com",   // Your current Render service URL
+      "http://localhost:5173",                // Vite default for local dev
+      "http://localhost:3000",                // Common React port
+      "http://127.0.0.1:5173"
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 
+// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// =============== API ROUTES ===============
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/register", require("./routes/registerRoutes"));
 app.use("/api/lab", require("./routes/labRoutes"));
@@ -28,16 +44,15 @@ app.use("/api/patient", require("./routes/patientRoutes"));
 app.use("/api/gov", require("./routes/govRoutes"));
 
 // =============== SERVE REACT FRONTEND ===============
-// Serve static files from the React build folder
+// Serve static files from React/Vite build
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-// SPA Fallback Route - This is very important for React Router
-// All unknown routes will serve index.html so React can handle routing
+// SPA Fallback - Critical for React Router (login, signup, dashboard etc.)
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
-// Global Error Handler
+// =============== GLOBAL ERROR HANDLER ===============
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
@@ -48,6 +63,6 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`Frontend is being served from: ${path.join(__dirname, "../frontend/dist")}`);
+  console.log(`✅ Server is running on port ${PORT}`);
+  console.log(`Frontend served from: ${path.join(__dirname, "../frontend/dist")}`);
 });
