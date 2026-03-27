@@ -1,13 +1,12 @@
 import axios from "axios";
 
-// Create axios instance with relative baseURL
-// Since frontend and backend are now served from the same domain
+// Use relative URL - Best when frontend & backend are on same domain
 const instance = axios.create({
-  baseURL: "/api",     // Important: Use relative path "/api"
-  timeout: 10000,      // Optional: 10 seconds timeout
+  baseURL: "/api",           // ← This is the correct one now
+  timeout: 15000,
 });
 
-// Request Interceptor - Add token automatically
+// Add token automatically
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -16,21 +15,15 @@ instance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response Interceptor (optional but recommended)
+// Handle common errors globally
 instance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // You can handle global errors here (like token expired)
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      // Optional: redirect to login
       window.location.href = "/login";
     }
     return Promise.reject(error);
