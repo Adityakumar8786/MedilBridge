@@ -16,7 +16,21 @@ const viewLabReports = async (req, res) => {
 
 const addDiagnosis = async (req, res) => {
   try {
-    const { labReportId, findings, prescription, followUpDate } = req.body;
+    const {
+      labReportId,
+      findings,
+      diseaseName,
+      prescription,
+      followUpDate,
+      isViral,
+      quarantineRequired,
+      quarantineDays,
+      quarantineType,
+      furtherTestsRequired,
+      recommendedTests,
+      severity,
+      status,
+    } = req.body;
 
     const report = await LabReport.findById(labReportId);
     if (!report) return res.status(404).json({ message: "Lab report not found" });
@@ -26,8 +40,17 @@ const addDiagnosis = async (req, res) => {
       patientId: report.patientId,
       doctorId: req.user._id,
       findings,
-      prescription,
-      followUpDate,
+      diseaseName: diseaseName || "",
+      prescription: prescription || "",
+      followUpDate: followUpDate || null,
+      isViral: isViral || false,
+      quarantineRequired: quarantineRequired || false,
+      quarantineDays: quarantineRequired ? (quarantineDays || 0) : 0,
+      quarantineType: quarantineRequired ? (quarantineType || "home") : "none",
+      furtherTestsRequired: furtherTestsRequired || false,
+      recommendedTests: furtherTestsRequired ? (recommendedTests || []) : [],
+      severity: severity || "mild",
+      status: status || "active",
     });
 
     await auditLog({
@@ -36,7 +59,7 @@ const addDiagnosis = async (req, res) => {
       action: "DIAGNOSIS_ADDED",
       targetModel: "Diagnosis",
       targetId: diagnosis._id,
-      newValue: { labReportId, findings },
+      newValue: { labReportId, findings, diseaseName, isViral, quarantineRequired },
       ipAddress: req.ip,
     });
 

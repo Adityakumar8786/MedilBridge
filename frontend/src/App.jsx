@@ -8,6 +8,7 @@ import PatientDashboard from "./pages/PatientDashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import LabDashboard from "./pages/LabDashboard";
 import GovDashboard from "./pages/GovDashboard";
+import Register from "./pages/Register";
 
 function RoleRedirect() {
   const { user } = useAuth();
@@ -46,6 +47,9 @@ function AppContent() {
               <LabDashboard lang={lang} />
             </ProtectedRoute>
           } />
+
+          <Route path="/register" element={<Register />} />
+          
           <Route path="/government" element={
             <ProtectedRoute allowedRoles={["government"]}>
               <GovDashboard lang={lang} />

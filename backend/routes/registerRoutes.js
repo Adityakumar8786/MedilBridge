@@ -1,10 +1,7 @@
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const { register } = require("../controllers/authController");
 
-const registerController = require('../controllers/registerController');
-
-router.post('/send-otp', registerController.sendOTP);
-router.post('/verify-otp', registerController.verifyOTP);
+router.post("/", register);
 
 module.exports = router;
