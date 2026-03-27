@@ -5,13 +5,16 @@ const path = require("path");
 const connectDB = require("./config/db");
 
 const app = express();
-
 connectDB();
 
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000"],
-  credentials: true,
+  origin: "*",
+  credentials: false,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
+app.options("*", cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -22,11 +25,6 @@ app.use("/api/lab", require("./routes/labRoutes"));
 app.use("/api/doctor", require("./routes/doctorRoutes"));
 app.use("/api/patient", require("./routes/patientRoutes"));
 app.use("/api/gov", require("./routes/govRoutes"));
-
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-});
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
