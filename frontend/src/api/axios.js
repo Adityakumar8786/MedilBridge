@@ -1,24 +1,19 @@
 import axios from "axios";
 
-// Use relative URL - Best when frontend & backend are on same domain
 const instance = axios.create({
-  baseURL: "/api",           // ← This is the correct one now
+  baseURL: "https://medilbridge.onrender.com/api",
   timeout: 15000,
 });
 
-// Add token automatically
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Handle common errors globally
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
