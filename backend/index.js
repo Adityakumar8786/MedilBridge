@@ -10,7 +10,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: "https://medilbridge-1.onrender.com/",
+  origin: "https://medilbridge-1.onrender.com",
   credentials: true
 }));
 
