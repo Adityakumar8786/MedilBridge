@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://medilbridge.onrender.com/api",
+  baseURL: "/api",   // ← relative only works if same domain
   timeout: 15000,
 });
 
